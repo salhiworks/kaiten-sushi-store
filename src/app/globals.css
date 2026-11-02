@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-zen-kaku), "Hiragino Sans", "Yu Gothic", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --font-heading: var(--font-display);
+  --color-vermilion: var(--vermilion);
+  --color-vermilion-foreground: var(--vermilion-foreground);
+  --color-sumi: var(--ai-950);
+  --color-ai-950: var(--ai-950);
+  --color-ai-900: var(--ai-900);
+  --color-ai-800: var(--ai-800);
+  --color-ai-700: var(--ai-700);
+  --color-kinari: var(--kinari);
+  --color-hinoki: var(--hinoki);
+  --color-hinoki-deep: var(--hinoki-deep);
+  --color-hinoki-light: var(--hinoki-light);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-plate-drop: plate-drop 520ms cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+  --animate-rise: rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/*
+ * KAITEN: a sushi counter at night.
+ *   ai      — indigo of the noren curtain over the door; the brand and every dark surface
+ *   kinari  — unbleached cotton; type on indigo
+ *   washi   — cool paper; reading surfaces
+ *   hinoki  — the pale cypress counter; where plates and orders sit
+ *   shu     — vermilion, only for the hanko seal
+ * chart-1…5 are the plate colours. They come from the database (see app/layout.tsx); these are fallbacks.
+ */
+:root {
+  color-scheme: light;
+  --ai-950: #0f1628;
+  --ai-900: #172139;
+  --ai-800: #202d4b;
+  --ai-700: #33446b;
+  --kinari: #efe9dd;
+  --hinoki: #dcc59c;
+  --hinoki-deep: #b0905f;
+  --hinoki-light: #ece1cb;
+  --vermilion: #c8432b;
+  --vermilion-foreground: #fbf7f0;
+
+  --background: #f3f2ee;
+  --foreground: #161f36;
+  --card: #fbfaf7;
+  --card-foreground: #161f36;
+  --popover: #fbfaf7;
+  --popover-foreground: #161f36;
+  --primary: #172139;
+  --primary-foreground: #efe9dd;
+  --secondary: #e8e6e0;
+  --secondary-foreground: #161f36;
+  --muted: #e8e6e0;
+  --muted-foreground: #5b6176;
+  --accent: #e8e6e0;
+  --accent-foreground: #161f36;
+  --destructive: #b3261e;
+  --border: #dad7cf;
+  --input: #d3d0c7;
+  --ring: #3d5a96;
+  --chart-1: #97918a;
+  --chart-2: #325d8c;
+  --chart-3: #608f50;
+  --chart-4: #cc4425;
+  --chart-5: #cd9b3c;
+  --radius: 0.75rem;
+}
+
+/* Night surfaces: the counter hero, footer, dish dialog and mobile menu. */
+.dark {
+  color-scheme: dark;
+  --background: #0f1628;
+  --foreground: #efe9dd;
+  --card: #18223b;
+  --card-foreground: #efe9dd;
+  --popover: #18223b;
+  --popover-foreground: #efe9dd;
+  --primary: #efe9dd;
+  --primary-foreground: #0f1628;
+  --secondary: #202d4b;
+  --secondary-foreground: #efe9dd;
+  --muted: #202d4b;
+  --muted-foreground: #a2aabd;
+  --accent: #202d4b;
+  --accent-foreground: #efe9dd;
+  --border: #2c3a5c;
+  --input: #34446a;
+  --ring: #dcc59c;
+  /* Theme aliases resolve where they are declared, so re-point them here for anything that reads
+     --color-* directly (the conveyor mixes its belt colours from these). */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  color: var(--foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-padding-top: 5.5rem;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "palt";
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--hinoki) 55%, transparent);
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+/* Fine wood grain for hinoki surfaces: two soft repeating stripes, no image. */
+@utility hinoki-grain {
+  background-color: var(--hinoki);
+  background-image:
+    repeating-linear-gradient(92deg, transparent 0 22px, color-mix(in oklab, var(--hinoki-deep) 14%, transparent) 22px 23px, transparent 23px 61px),
+    repeating-linear-gradient(88deg, transparent 0 9px, color-mix(in oklab, white 10%, transparent) 9px 10px, transparent 10px 37px),
+    linear-gradient(180deg, color-mix(in oklab, white 18%, transparent), transparent 60%);
+}
+
+@keyframes plate-drop {
+  0% { transform: translateY(-28px) scale(0.92); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes rise {
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-plate-drop, .animate-rise { animation: none; }
+}
