@@ -33,15 +33,19 @@ Open http://localhost:3000/demo/admin for the **demo admin**: the same dashboard
 
 ## 2. Make it a real store with Supabase (about 15 minutes)
 
-Supabase holds your menu, opening hours and orders, and signs in your admin. The free plan is enough. You only need the website, no command line.
+Supabase holds your menu, opening hours and orders, and signs in your admin. The free plan is enough.
 
 1. **Create a project** at [supabase.com](https://supabase.com). Choose a region near your restaurant and save the database password somewhere safe (KAITEN doesn't need it).
-2. **Create the tables, security rules and starting menu.** Open **SQL Editor**, click **New query**, paste the whole contents of each file below, and click **Run**. Do them one at a time, in this order:
-   1. `supabase/migrations/20261102200000_kaiten_schema.sql`: tables, security rules, ordering functions and the `dish-images` photo bucket
-   2. `supabase/migrations/20261102200100_kaiten_seed.sql`: five plate colours, four categories, eight dishes and opening hours
-   3. `supabase/migrations/20261102200200_kaiten_private_helpers.sql`: keeps an internal helper out of the public API
+2. **Create the tables, security rules and starting menu.** Three SQL files in `supabase/migrations/` do it, in this order:
+   1. `20261102200000_kaiten_schema.sql`: tables, security rules, ordering functions and the `dish-images` photo bucket
+   2. `20261102200100_kaiten_seed.sql`: five plate colours, four categories, eight dishes and opening hours
+   3. `20261102200200_kaiten_private_helpers.sql`: keeps an internal helper out of the public API
 
-   Run each file once. Each one should finish with "Success. No rows returned".
+   **Recommended: the Supabase CLI, with Claude Desktop or your terminal.** Open this folder in [Claude Desktop](https://claude.ai/download)'s Code tab and ask it to follow [docs/SUPABASE.md](docs/SUPABASE.md), or run the commands there yourself. The CLI is pinned in this project (`npx supabase`, version 2.122.0), so there is nothing to install globally. It links your project, shows exactly what it will apply before it applies it, and records the three files in your project's migration history.
+
+   **Fallback: the SQL Editor.** In the dashboard, open **SQL Editor**, click **New query**, paste the whole contents of each file above, and click **Run**. Do them one at a time, in order. Each should finish with "Success. No rows returned".
+
+   Use one way per project, not both: the files are not safe to run twice.
 3. **Check the photo bucket.** Under **Storage** you should see a public bucket called `dish-images`. The first file created it and its upload rules; there is nothing to set up by hand.
 4. **Turn off public sign-ups.** In **Authentication → Sign In / Providers**, turn off **Allow new users to sign up**. KAITEN has no customer accounts; only you sign in.
 5. **Create your admin account.**
@@ -146,6 +150,7 @@ reference/original/       the belt component as published, for comparison
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Generates Next.js route types, then runs TypeScript |
 | `npm run admin:create -- <email>` | Optional: create or promote an admin from the command line |
+| `npx supabase …` | Optional: the pinned Supabase CLI, for setting up the database ([docs/SUPABASE.md](docs/SUPABASE.md)) |
 
 ## Before you open for business
 
