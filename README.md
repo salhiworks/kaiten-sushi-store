@@ -2,7 +2,7 @@
 
 A premium storefront for a conveyor-belt sushi restaurant, built with Next.js around an interactive sushi belt. Guests watch the plates go round, lift one for a closer look, and stack the plates they want, just as at a real kaiten counter. They order for pickup and pay at the counter, and the owner runs everything from a private admin.
 
-**Live demo: [kaiten-sushi-store.vercel.app](https://kaiten-sushi-store.vercel.app)**
+**Live demo: [kaiten-sushi-store.vercel.app](https://kaiten-sushi-store.vercel.app)** · **Admin demo: [/demo/admin](https://kaiten-sushi-store.vercel.app/demo/admin)**
 
 ![The KAITEN homepage: a sushi belt at night, with five plates stacked on the counter below](docs/images/storefront-belt.jpg)
 
@@ -16,7 +16,7 @@ What's inside:
 - **An admin for the owner:** orders and their status, dishes and photos, plate prices, categories, opening hours and a pause switch.
 - **Plate-colour pricing:** each plate colour has one price, so the belt, menu, order and receipts always agree.
 
-**It runs with no accounts at all.** Without Supabase, KAITEN is a demo store: everything works except ordering and the admin.
+**It runs with no accounts at all.** Without Supabase, KAITEN is a demo store with a demo admin: everything works except real ordering.
 
 ## 1. Try it on your computer (2 minutes, no accounts)
 
@@ -27,7 +27,9 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. You get the full storefront with eight demo dishes, in demo mode: the belt, menu and plate stack all work, ordering is turned off, and nothing is saved anywhere except the order in your own browser.
+Open http://localhost:3000. You get the full storefront with eight demo dishes, in demo mode: the belt, menu and plate stack all work, and ordering is turned off.
+
+Open http://localhost:3000/demo/admin for the **demo admin**: the same dashboard as the real one, running a sample restaurant with sample orders. Change a price, mark a dish sold out or move an order along, and the demo store follows. Everything stays in your own browser; **Reset demo** puts it back.
 
 ## 2. Make it a real store with Supabase (about 15 minutes)
 
@@ -80,7 +82,8 @@ More detail, including the public demo and other hosts: [docs/DEPLOY.md](docs/DE
 
 The demo build is a locked showcase you can host anywhere:
 - the belt, menu, dish details, plate stack and order work as usual;
-- ordering is off, no guest details are asked for, and `/admin` is a 404;
+- `/demo/admin` is a demo of the admin, with sample data kept in each visitor's browser (checkout can send the cart there as a sample order);
+- ordering is off, no guest details are asked for, and the real `/admin` is a 404;
 - it never contacts Supabase, even if Supabase settings are present.
 
 ```bash
@@ -112,17 +115,21 @@ To add another admin, repeat step 5. If you prefer the command line, `npm run ad
 - **Prices live on plates.** A dish has no price of its own; its plate colour has one. That's what keeps every price on the site consistent.
 - **The database has the final say.** The browser sends only dish ids, quantities and the total it showed. Supabase checks opening hours, the pause switch, stock and the guest's details, prices the order itself, and refuses it if the total has changed (the guest sees the new total and confirms again).
 - **Guests never touch order tables.** They can only place an order and read their own confirmation, through a link with an unguessable code. The confirmation never shows the phone number.
+- **The demo admin is not the admin.** It exists only in demo builds, uses the same screens with browser-only sample data, and never talks to a server. In a live store `/demo/admin` is a 404 and the real `/admin` needs a signed-in admin.
 - **Admins are a list, not a password.** Row-level security lets only accounts in `admin_users` change the menu, settings, photos or orders.
 
 ```
 src/
   app/(store)/            storefront: /, /menu, /about, /checkout, /order/[token]
   app/admin/              sign-in and the admin
+  app/demo/admin/         the demo admin (demo builds only; 404 in a live store)
   components/ui/sushi-conveyor-menu.tsx   the interactive belt
+  components/admin/       admin screens, shared by the real and demo admin (admin-api.tsx)
   components/cart/        order provider, plate stack, order sheet
   lib/menu/               types, demo menu, cached fetchers, photo sources
   lib/orders/             checkout validation and the place-order action
   lib/admin/              admin access check, data and actions
+  lib/demo/store.ts       the demo admin's browser-only sample restaurant
   proxy.ts                keeps admin sessions fresh
 supabase/migrations/      the three SQL files from step 2
 scripts/                  public-demo.mjs, create-admin.mjs

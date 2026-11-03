@@ -24,7 +24,7 @@ KAITEN is a standard Next.js server: it needs a Node.js host, not static hosting
 The demo build is locked when it is built:
 - It ignores any Supabase settings, even if they are present on the server.
 - It asks for no guest details: checkout shows the order and explains that ordering is off.
-- `/admin` is a 404.
+- `/admin` is a 404. `/demo/admin` is the demo admin instead: sample data in each visitor's browser, no server involved.
 - It never contacts Supabase.
 
 The store build reads `KAITEN_MODE` when it is built, too, so a build made without `KAITEN_MODE=live` is always a demo.

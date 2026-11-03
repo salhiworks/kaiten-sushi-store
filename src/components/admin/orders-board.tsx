@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Phone, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -17,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { setOrderStatus } from "@/lib/admin/actions";
+import { useAdminApi } from "./admin-api";
 import type { AdminOrder, OrderView } from "@/lib/admin/data";
 import type { OrderStatus } from "@/lib/admin/schemas";
 import { formatPrice } from "@/lib/money";
@@ -46,7 +45,7 @@ function timeAgo(iso: string, now: number) {
 }
 
 export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders: AdminOrder[]; counts: Record<OrderView, number> }) {
-  const router = useRouter();
+  const { base, refresh } = useAdminApi();
   const [refreshing, startRefresh] = React.useTransition();
   const [now, setNow] = React.useState<number | null>(null);
 
@@ -54,7 +53,7 @@ export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders:
   React.useEffect(() => {
     const tick = () => {
       setNow(Date.now());
-      startRefresh(() => router.refresh());
+      if (refresh) startRefresh(refresh);
     };
     const first = window.setTimeout(() => setNow(Date.now()), 0);
     const timer = window.setInterval(tick, 20_000);
@@ -62,7 +61,7 @@ export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders:
       window.clearTimeout(first);
       window.clearInterval(timer);
     };
-  }, [router]);
+  }, [refresh]);
 
   return (
     <div>
@@ -71,7 +70,7 @@ export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders:
           {VIEWS.map((item) => (
             <Link
               key={item.key}
-              href={item.key === "active" ? "/admin" : `/admin?view=${item.key}`}
+              href={item.key === "active" ? base : `${base}?view=${item.key}`}
               aria-current={view === item.key ? "page" : undefined}
               className={cn(
                 "inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -83,10 +82,12 @@ export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders:
             </Link>
           ))}
         </nav>
-        <Button variant="ghost" size="sm" onClick={() => startRefresh(() => router.refresh())} disabled={refreshing} className="text-muted-foreground">
-          <RefreshCw aria-hidden="true" className={cn(refreshing && "animate-spin motion-reduce:animate-none")} />
-          Refresh
-        </Button>
+        {refresh && (
+          <Button variant="ghost" size="sm" onClick={() => startRefresh(refresh)} disabled={refreshing} className="text-muted-foreground">
+            <RefreshCw aria-hidden="true" className={cn(refreshing && "animate-spin motion-reduce:animate-none")} />
+            Refresh
+          </Button>
+        )}
       </div>
 
       {orders.length === 0 ? (
@@ -104,6 +105,7 @@ export function OrdersBoard({ view, orders, counts }: { view: OrderView; orders:
 }
 
 function OrderCard({ order, now }: { order: AdminOrder; now: number | null }) {
+  const { setOrderStatus } = useAdminApi();
   const [pending, startTransition] = React.useTransition();
   const meta = STATUS[order.status];
   const update = (status: OrderStatus, message: string) =>

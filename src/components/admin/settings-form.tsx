@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { saveSettings } from "@/lib/admin/actions";
+import { useAdminApi } from "./admin-api";
 import { firstIssue, settingsSchema } from "@/lib/admin/schemas";
 import type { RestaurantSettings } from "@/lib/menu";
 import { DAY_NAMES } from "@/lib/restaurant/hours";
@@ -24,6 +24,7 @@ const ZONES = [
 ];
 
 export function SettingsForm({ settings }: { settings: RestaurantSettings }) {
+  const { saveSettings } = useAdminApi();
   const [values, setValues] = React.useState(settings);
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();

@@ -9,6 +9,7 @@ import { useCart } from "@/components/cart/cart-provider";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { hoursSummary } from "@/lib/restaurant/hours";
 import { cn } from "@/lib/utils";
+import { useStoreMenu } from "@/components/store/store-menu";
 import { BrandMark } from "./brand-mark";
 import { OpeningStatus } from "./opening-status";
 
@@ -19,7 +20,9 @@ export const NAV = [
 ] as const;
 
 /** The noren: one indigo bar across the top of every page. */
-export function SiteHeader({ name }: { name: string }) {
+export function SiteHeader() {
+  const { restaurant: { name } } = useStoreMenu();
+  const { demo } = useCart();
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
@@ -38,6 +41,11 @@ export function SiteHeader({ name }: { name: string }) {
 
         <div className="ml-auto flex items-center gap-3 sm:gap-5">
           <OpeningStatus className="hidden lg:inline-flex" />
+          {demo && (
+            <Link href="/demo/admin" data-demo-admin-link className="hidden h-10 items-center rounded-full bg-hinoki px-4 text-sm font-bold text-ai-950 outline-none transition-transform hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none md:inline-flex">
+              Explore admin demo
+            </Link>
+          )}
           <CartButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -85,7 +93,7 @@ function DesktopLinks({ pathname }: { pathname: string | null }) {
 }
 
 function MobileMenu({ name, onNavigate }: { name: string; onNavigate: () => void }) {
-  const { restaurant } = useCart();
+  const { restaurant, demo } = useCart();
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center justify-between px-4">
@@ -99,6 +107,17 @@ function MobileMenu({ name, onNavigate }: { name: string; onNavigate: () => void
           <CurrentPath>{(pathname) => <MobileLinks pathname={pathname} onNavigate={onNavigate} />}</CurrentPath>
         </React.Suspense>
       </nav>
+      {demo && (
+        <div className="px-6 pb-6">
+          <Link href="/demo/admin" onClick={onNavigate} data-demo-admin-link className="flex items-center justify-between rounded-2xl bg-hinoki px-5 py-4 text-ai-950 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <span>
+              <span className="block font-display text-xl font-bold">Explore admin demo</span>
+              <span className="text-sm text-ai-950/75">Run the sample restaurant: prices, stock, orders.</span>
+            </span>
+            <span aria-hidden="true" className="text-xl">→</span>
+          </Link>
+        </div>
+      )}
       <div className="space-y-4 border-t border-white/10 px-6 py-6 text-sm">
         <OpeningStatus />
         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-muted-foreground">

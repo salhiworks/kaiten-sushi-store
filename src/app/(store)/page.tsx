@@ -1,14 +1,13 @@
 import { ConveyorHero } from "@/components/home/conveyor-hero";
-import { CraftSection, HowItWorks, PlateKey } from "@/components/home/sections";
-import { getMenu } from "@/lib/menu/server";
+import { PlateKey } from "@/components/home/plate-key";
+import { CraftSection, HowItWorks } from "@/components/home/sections";
 
-export default async function HomePage() {
-  const { dishes, tiers } = await getMenu();
+export default function HomePage() {
   return (
     <>
-      <ConveyorHero dishes={dishes} />
+      <ConveyorHero />
       <HowItWorks />
-      <PlateKey dishes={dishes} tiers={tiers} />
+      <PlateKey />
       <CraftSection />
     </>
   );

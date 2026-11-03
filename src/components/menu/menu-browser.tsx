@@ -3,14 +3,16 @@
 import * as React from "react";
 import Image from "next/image";
 import { AddToOrder } from "@/components/cart/add-to-order";
-import { ALLERGEN_LABELS, TAG_LABELS, type Dish, type MenuCategory, type Tier } from "@/lib/menu";
+import { ALLERGEN_LABELS, TAG_LABELS, type Dish, type Tier } from "@/lib/menu";
 import { formatPrice } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { DishDetail } from "./dish-detail";
+import { useStoreMenu } from "@/components/store/store-menu";
 
 type Filter = string;
 
-export function MenuBrowser({ categories, dishes, tiers }: { categories: MenuCategory[]; dishes: Dish[]; tiers: Tier[] }) {
+export function MenuBrowser() {
+  const { categories, dishes, tiers } = useStoreMenu();
   const [filter, setFilter] = React.useState<Filter>("all");
   const [selected, setSelected] = React.useState<Dish | null>(null);
   const [detailOpen, setDetailOpen] = React.useState(false);

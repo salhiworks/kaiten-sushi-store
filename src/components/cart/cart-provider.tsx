@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import * as store from "@/lib/cart/store";
 import type { Dish, RestaurantSettings } from "@/lib/menu";
 import { formatPrice } from "@/lib/money";
+import { useStoreMenu } from "@/components/store/store-menu";
 import { orderingState, type OrderingState } from "@/lib/restaurant/hours";
 
 export interface CartItem {
@@ -55,7 +56,8 @@ function useOrderingState(restaurant: RestaurantSettings) {
   return React.useMemo(() => (minute < 0 ? null : orderingState(restaurant)), [restaurant, minute]);
 }
 
-export function CartProvider({ dishes, restaurant, demo, children }: { dishes: Dish[]; restaurant: RestaurantSettings; demo: boolean; children: React.ReactNode }) {
+export function CartProvider({ demo, children }: { demo: boolean; children: React.ReactNode }) {
+  const { dishes, restaurant } = useStoreMenu();
   const lines = React.useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
   const [open, setOpen] = React.useState(false);
   const liveOrdering = useOrderingState(restaurant);

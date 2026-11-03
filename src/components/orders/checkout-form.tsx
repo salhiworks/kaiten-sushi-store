@@ -16,6 +16,8 @@ import { formatPrice } from "@/lib/money";
 import { placeOrder } from "@/lib/orders/actions";
 import { checkoutSchema, type CheckoutField } from "@/lib/orders/checkout";
 import { cn } from "@/lib/utils";
+import * as demoStore from "@/lib/demo/store";
+import { toast } from "sonner";
 
 export function CheckoutForm() {
   const { items, subtotalCents, unavailable, restaurant, ordering, demo, ready } = useCart();
@@ -53,6 +55,14 @@ export function CheckoutForm() {
       </div>
     );
   }
+
+  const sendToDemoAdmin = () => {
+    const result = demoStore.sendSampleOrder(orderable.map((item) => ({ dishId: item.dish.id, quantity: item.quantity })));
+    if (!result.ok) return void toast.error(result.error);
+    clear();
+    toast.success(`Order ${result.reference} is waiting in the demo admin.`);
+    router.push("/demo/admin");
+  };
 
   const focusFirstError = (fields: Partial<Record<CheckoutField, string>>) => {
     const first = (["name", "phone", "notes"] as const).find((field) => fields[field]);
@@ -166,7 +176,13 @@ export function CheckoutForm() {
             In a real KAITEN store, guests enter a name and phone number here, place the order, and pay when they collect it. This demo store
             takes no orders and asks for no details, so your plates simply stay in your order.
           </p>
-          <Link href="/" className={buttonVariants({ size: "lg", className: "mt-6" })}>Back to the belt</Link>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Button type="button" size="lg" data-send-demo-order disabled={orderable.length === 0} onClick={sendToDemoAdmin}>
+              Send to the demo admin
+            </Button>
+            <Link href="/demo/admin" className={buttonVariants({ size: "lg", variant: "outline", className: "bg-background" })}>Explore admin demo</Link>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">Sends a sample order from &ldquo;Demo guest&rdquo; to the demo admin in this browser. Nothing leaves your device.</p>
         </div>
       ) : (
       <form ref={formRef} onSubmit={submit} noValidate className="space-y-5 lg:col-start-1" aria-describedby={formError ? "checkout-error" : undefined}>

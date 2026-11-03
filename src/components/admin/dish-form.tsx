@@ -23,21 +23,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { createDish, deleteDish, discardUpload, updateDish } from "@/lib/admin/actions";
 import type { AdminDish } from "@/lib/admin/data";
 import { dishSchema, firstIssue, slugify, type DishInput } from "@/lib/admin/schemas";
 import { ALLERGEN_LABELS, TAG_LABELS, type MenuCategory, type PlateTier, type Tier } from "@/lib/menu";
-import { DISH_IMAGE_BUCKET, PLACEHOLDER_IMAGE } from "@/lib/menu/images";
+import { PLACEHOLDER_IMAGE } from "@/lib/menu/images";
 import { ALLERGENS, DISH_TAGS } from "@/lib/menu/types";
 import { formatPrice } from "@/lib/money";
-import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
+import { useAdminApi } from "./admin-api";
 
 const PHOTO_TYPES: Record<string, string> = { "image/png": "png", "image/webp": "webp", "image/jpeg": "jpg", "image/avif": "avif" };
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; categories: MenuCategory[]; tiers: Tier[] }) {
   const router = useRouter();
+  const { base, createDish, updateDish, deleteDish, discardUpload, uploadPhoto } = useAdminApi();
   const creating = dish === null;
   const [values, setValues] = React.useState<DishInput>(() => ({
     id: dish?.id ?? "",
@@ -91,7 +91,7 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
     try {
       if (photo) {
         uploaded = `dishes/${check.data.id}-${Date.now().toString(36)}.${PHOTO_TYPES[photo.file.type]}`;
-        const { error: uploadError } = await createBrowserSupabase().storage.from(DISH_IMAGE_BUCKET).upload(uploaded, photo.file, { contentType: photo.file.type, cacheControl: "31536000" });
+        const { error: uploadError } = uploadPhoto ? await uploadPhoto(uploaded, photo.file) : { error: "Photo uploads are off." };
         if (uploadError) {
           uploaded = null;
           throw new Error("The photo could not be uploaded. Please try again.");
@@ -101,9 +101,9 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
       const result = creating ? await createDish(input) : await updateDish(input);
       if (!result.ok) throw new Error(result.error);
       toast.success(creating ? `${values.name} added to the menu.` : `${values.name} saved.`);
-      router.push("/admin/menu");
+      router.push(`${base}/menu`);
     } catch (failure) {
-      if (uploaded) await discardUpload(uploaded);
+      if (uploaded && discardUpload) await discardUpload(uploaded);
       setError(failure instanceof Error ? failure.message : "Saving failed. Please try again.");
       setSaving(false);
     }
@@ -114,7 +114,7 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
       const result = await deleteDish(values.id);
       if (!result.ok) return void toast.error(result.error);
       toast.success(`${values.name} removed from the menu.`);
-      router.push("/admin/menu");
+      router.push(`${base}/menu`);
     });
 
   const input = "h-10 bg-card px-3 text-base sm:text-sm";
@@ -180,7 +180,7 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
         <fieldset disabled={saving} className="rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
           <legend className="float-left mb-1 w-full font-display text-lg">Plate colour and price</legend>
           <p className="clear-both mb-4 text-sm text-muted-foreground">
-            The plate colour sets the price, just like on the belt. <Link href="/admin/plates" className="underline underline-offset-4 hover:text-foreground">Change plate prices</Link>
+            The plate colour sets the price, just like on the belt. <Link href={`${base}/plates`} className="underline underline-offset-4 hover:text-foreground">Change plate prices</Link>
           </p>
           <div role="radiogroup" aria-label="Plate colour" className="grid gap-2 sm:grid-cols-5">
             {tiers.map((t) => (
@@ -222,7 +222,7 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
             {saving && <Loader2 aria-hidden="true" className="animate-spin" />}
             {creating ? "Add dish" : "Save changes"}
           </Button>
-          <Link href="/admin/menu" className="px-3 text-sm text-muted-foreground hover:text-foreground">Cancel</Link>
+          <Link href={`${base}/menu`} className="px-3 text-sm text-muted-foreground hover:text-foreground">Cancel</Link>
           {!creating && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -255,14 +255,22 @@ export function DishForm({ dish, categories, tiers }: { dish: AdminDish | null; 
             <Image src={preview} alt="" fill sizes="240px" className="object-contain" unoptimized={!!photo} />
             <span aria-hidden="true" className="absolute -inset-[2%] rounded-full border-[3px]" style={{ borderColor: tier?.color }} />
           </div>
-          <input ref={fileRef} type="file" accept="image/png,image/webp,image/jpeg,image/avif" className="sr-only" data-photo-input onChange={(e) => choosePhoto(e.target.files?.[0])} tabIndex={-1} />
-          <Button type="button" variant="outline" className="mt-5 w-full bg-background" disabled={saving} onClick={() => fileRef.current?.click()}>
-            <ImageUp aria-hidden="true" />
-            {photo || dish?.imagePath ? "Replace photo" : "Upload photo"}
-          </Button>
-          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            Best: a square, top-down photo of the plate on a transparent background (PNG or WebP), at least 800 × 800 px, up to 5 MB.
-          </p>
+          {uploadPhoto ? (
+            <>
+              <input ref={fileRef} type="file" accept="image/png,image/webp,image/jpeg,image/avif" className="sr-only" data-photo-input onChange={(e) => choosePhoto(e.target.files?.[0])} tabIndex={-1} />
+              <Button type="button" variant="outline" className="mt-5 w-full bg-background" disabled={saving} onClick={() => fileRef.current?.click()}>
+                <ImageUp aria-hidden="true" />
+                {photo || dish?.imagePath ? "Replace photo" : "Upload photo"}
+              </Button>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                Best: a square, top-down photo of the plate on a transparent background (PNG or WebP), at least 800 × 800 px, up to 5 MB.
+              </p>
+            </>
+          ) : (
+            <p data-demo-photo-note className="mt-5 rounded-xl bg-background p-3 text-xs leading-relaxed text-muted-foreground">
+              Photo uploads are off in the demo. In a real store you upload a square, top-down photo here and it goes straight to your Supabase Storage.
+            </p>
+          )}
           {photo && <p className="mt-2 text-xs font-medium text-foreground">New photo selected. It is uploaded when you save.</p>}
         </div>
 

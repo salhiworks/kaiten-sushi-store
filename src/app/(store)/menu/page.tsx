@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { MenuBrowser } from "@/components/menu/menu-browser";
-import { ALLERGEN_LABELS, plateTiers } from "@/lib/menu";
+import { PlateLegend } from "@/components/menu/plate-legend";
+import { ALLERGEN_LABELS } from "@/lib/menu";
 import { getMenu } from "@/lib/menu/server";
-import { formatPrice } from "@/lib/money";
 
 export const metadata: Metadata = {
   title: "Menu",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MenuPage() {
-  const { categories, dishes, tiers } = await getMenu();
+  const { dishes } = await getMenu();
   const allergens = [...new Set(dishes.flatMap((dish) => dish.allergens))].map((a) => ALLERGEN_LABELS[a].toLowerCase());
 
   return (
@@ -23,17 +23,10 @@ export default async function MenuPage() {
             Every plate from the belt, with what&apos;s on it and what it contains. Tap a dish for a closer look.
           </p>
         </div>
-        <ul aria-label="Plate colours by price" className="flex flex-wrap gap-2">
-          {plateTiers(dishes).map((entry) => (
-            <li key={entry.tier} className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-card pl-2 pr-3.5 text-sm tabular-nums">
-              <span aria-hidden="true" className="size-5 rounded-full border-[3.5px]" style={{ borderColor: `var(--chart-${entry.tier})` }} />
-              {formatPrice(entry.priceCents)}
-            </li>
-          ))}
-        </ul>
+        <PlateLegend />
       </header>
 
-      <MenuBrowser categories={categories} dishes={dishes} tiers={tiers} />
+      <MenuBrowser />
 
       <aside aria-label="Allergen information" className="mx-auto max-w-[90rem] px-4 pb-24 sm:px-6 lg:px-10">
         <div className="max-w-2xl rounded-[1.5rem] border border-border bg-card p-6 text-sm leading-relaxed text-muted-foreground sm:p-8">

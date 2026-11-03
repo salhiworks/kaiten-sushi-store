@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createCategory, deleteCategory, moveCategory, updateCategory } from "@/lib/admin/actions";
+import { useAdminApi } from "./admin-api";
 import { categorySchema, firstIssue, slugify, type CategoryInput } from "@/lib/admin/schemas";
 import type { MenuCategory } from "@/lib/menu";
 
@@ -41,6 +41,7 @@ export function CategoriesManager({ categories, counts }: { categories: MenuCate
 type Run = (work: () => Promise<{ ok: boolean; error?: string }>, success: string) => void;
 
 function CategoryRow({ category, count, first, last, pending, run }: { category: MenuCategory; count: number; first: boolean; last: boolean; pending: boolean; run: Run }) {
+  const { moveCategory, deleteCategory, updateCategory } = useAdminApi();
   const [draft, setDraft] = React.useState<CategoryInput>(category);
   const dirty = draft.label !== category.label || draft.labelJa !== category.labelJa || draft.description !== category.description;
   const save = () => {
@@ -78,6 +79,7 @@ function CategoryRow({ category, count, first, last, pending, run }: { category:
 }
 
 function NewCategory({ pending, run }: { pending: boolean; run: Run }) {
+  const { createCategory } = useAdminApi();
   const [label, setLabel] = React.useState("");
   const [labelJa, setLabelJa] = React.useState("");
   const [description, setDescription] = React.useState("");

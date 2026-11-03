@@ -7,7 +7,7 @@ import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { TierRing } from "@/components/site/brand-mark";
 import { Switch } from "@/components/ui/switch";
-import { setDishFlags } from "@/lib/admin/actions";
+import { useAdminApi } from "./admin-api";
 import type { AdminDish } from "@/lib/admin/data";
 import type { MenuCategory, Tier } from "@/lib/menu";
 import { formatPrice } from "@/lib/money";
@@ -45,6 +45,7 @@ export function DishList({ dishes, categories, tiers }: { dishes: AdminDish[]; c
 }
 
 function DishRow({ dish, tier }: { dish: AdminDish; tier?: Tier }) {
+  const { base, setDishFlags } = useAdminApi();
   const [flags, setFlags] = React.useOptimistic({ available: dish.available, visible: dish.visible });
   const [, startTransition] = React.useTransition();
 
@@ -79,7 +80,7 @@ function DishRow({ dish, tier }: { dish: AdminDish; tier?: Tier }) {
           <Switch checked={flags.visible} onCheckedChange={(visible) => change({ visible }, visible ? `${dish.name} is on the menu.` : `${dish.name} is hidden from guests.`)} data-toggle="visible" />
           <span className="text-muted-foreground">On menu</span>
         </label>
-        <Link href={`/admin/menu/${dish.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">
+        <Link href={`${base}/menu/${dish.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">
           <Pencil aria-hidden="true" className="size-3.5" />
           Edit
         </Link>

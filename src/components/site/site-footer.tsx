@@ -1,11 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { OpenCartButton } from "@/components/cart/cart-button";
-import type { RestaurantSettings } from "@/lib/menu";
+import { useCart } from "@/components/cart/cart-provider";
+import { useStoreMenu } from "@/components/store/store-menu";
 import { hoursSummary } from "@/lib/restaurant/hours";
 import { BrandMark } from "./brand-mark";
 import { OpeningStatus } from "./opening-status";
 
-export function SiteFooter({ restaurant }: { restaurant: RestaurantSettings }) {
+export function SiteFooter() {
+  const { restaurant } = useStoreMenu();
+  const { demo } = useCart();
   const link = "outline-none transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:underline";
   const label = "mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-muted-foreground";
   return (
@@ -50,6 +55,7 @@ export function SiteFooter({ restaurant }: { restaurant: RestaurantSettings }) {
               <li><Link href="/" className={link}>Home</Link></li>
               <li><Link href="/menu" className={link}>Menu</Link></li>
               <li><Link href="/about" className={link}>About</Link></li>
+              {demo && <li><Link href="/demo/admin" className={link}>Admin demo</Link></li>}
             </ul>
           </nav>
           <p>© {restaurant.name} <span lang="ja" className="ml-3 font-display tracking-[0.3em]">回転寿司</span></p>

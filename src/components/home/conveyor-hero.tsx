@@ -6,10 +6,10 @@ import { ArrowRight } from "lucide-react";
 import { useCart, useCartActions } from "@/components/cart/cart-provider";
 import { PlateStack, useOrderPlates } from "@/components/cart/plate-stack";
 import SushiConveyorMenu, { type ConveyorDish } from "@/components/ui/sushi-conveyor-menu";
-import type { Dish } from "@/lib/menu";
 import { toConveyorDish } from "@/lib/menu/conveyor";
 import { formatPrice } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import { useStoreMenu } from "@/components/store/store-menu";
 
 const TOUCH_QUERY = "(hover: none) and (pointer: coarse)";
 
@@ -30,7 +30,8 @@ function useTouchDevice() {
  * The night counter: the belt under a warm pendant light, and in front of it the hinoki counter
  * where the guest's plates stack up.
  */
-export function ConveyorHero({ dishes }: { dishes: Dish[] }) {
+export function ConveyorHero() {
+  const { dishes } = useStoreMenu();
   const { add } = useCartActions();
   const touch = useTouchDevice();
   // Only plates that can be ordered ride the belt. Stable items: the conveyor re-lays out the belt whenever this array changes.

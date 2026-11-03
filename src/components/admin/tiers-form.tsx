@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveTiers } from "@/lib/admin/actions";
+import { useAdminApi } from "./admin-api";
 import { firstIssue, tiersSchema } from "@/lib/admin/schemas";
 import type { Tier } from "@/lib/menu";
 import { formatPrice } from "@/lib/money";
@@ -15,6 +15,7 @@ type Draft = { id: number; name: string; color: string; price: string };
 
 export function TiersForm({ tiers, dishesByTier }: { tiers: Tier[]; dishesByTier: Record<number, string[]> }) {
   const [drafts, setDrafts] = React.useState<Draft[]>(() => tiers.map((t) => ({ id: t.id, name: t.name, color: t.color, price: (t.priceCents / 100).toFixed(2) })));
+  const { saveTiers } = useAdminApi();
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
   const update = (id: number, patch: Partial<Draft>) => setDrafts((old) => old.map((d) => (d.id === id ? { ...d, ...patch } : d)));

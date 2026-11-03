@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AdminShell, AdminShellFallback } from "@/components/admin/admin-shell";
+import { LiveAdminApi } from "@/components/admin/live-admin-api";
 import { NoAccess } from "@/components/admin/no-access";
+import { signOut } from "@/lib/admin/actions";
 import { getAdminSession, getSettingsForAdmin } from "@/lib/admin/data";
 import { isLive } from "@/lib/config";
 
@@ -21,8 +23,10 @@ async function Gate({ children }: { children: React.ReactNode }) {
   if (session.status !== "admin") return <NoAccess email={session.email} />;
   const settings = await getSettingsForAdmin(session.db);
   return (
-    <AdminShell restaurantName={settings.name} acceptingOrders={settings.acceptingOrders} email={session.email}>
-      {children}
-    </AdminShell>
+    <LiveAdminApi>
+      <AdminShell restaurantName={settings.name} acceptingOrders={settings.acceptingOrders} email={session.email} signOut={signOut}>
+        {children}
+      </AdminShell>
+    </LiveAdminApi>
   );
 }
